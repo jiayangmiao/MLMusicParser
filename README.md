@@ -9,6 +9,8 @@ The decision was made since the in game audioroom provides all the information a
 
 To use the app, rename the MLMusicInfoTemplate.xlsx into MLMusicInfo.xlsx and this is the file the script will write its outputs to.
 To find the input, go to the mobage page of [audio room](http://imas.gree-apps.net/app/index.php/audio_room), 
-Use inspect elements or any other tools to get the source code and only copy the div with id tab-slide-area (<code><div id="tab-slide-area"></code>).
-It resides in <code> <body><div id="gree-app-container"><div id="wrapper"><div class="main-bg"></code>.
+Use inspect elements or any other tools to get the source code and only copy the div with id tab-slide-area 
+    <div id="tab-slide-area">
+It resides in
+    <body><div id="gree-app-container"><div id="wrapper"><div class="main-bg">
 Copy the element from chrome will help you copy the whole div easily. Then paste it into input.txt.
