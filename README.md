@@ -1,5 +1,8 @@
 
 # MLMusicParser
+
+## This code will be rewritten in C++ and provide a much easier way to use in the future.
+
 A piece of Java code that parses the information of all the music from game Idolm@ster Million Live! along with the official samples m4a links to them that are provided in its official mobile game.
 
 It will also parse the information of the CDs. 
