@@ -1,22 +1,12 @@
-
 # MLMusicParser
 
-## This code will be rewritten in C++ and provide a much easier way to use in the future.
+## Now being rewritten in Python as part of my self-learning plan
 
-A piece of Java code that parses the information of all the music from game Idolm@ster Million Live! along with the official samples m4a links to them that are provided in its official mobile game.
+A piece of Python code that parses the information of all the music from game Idolm@ster Million Live! along with the official samples m4a links to them that are provided in its official mobile game.
 
-It will also parse the information of the CDs. 
+It will group the songs in CDs with associated information related to each CD including link to the CD Cover.
 
-The code reads a certain input file (input.txt) and the user is responsible to feed to file with certain source code from the mobage's page that corresponds to a whole CD's information.
-The decision was made since the in game audioroom provides all the information and it is not a static page. 
+## How to Use
+To get started, log in into game (you do need an account), open the page of audio room (http://imas.gree-apps.net/app/index.php/audio_room), and save the webpage as "ml.html". Put it in same directory as the python script.
 
-To use the app, rename the MLMusicInfoTemplate.xlsx into MLMusicInfo.xlsx and this is the file the script will write its outputs to.
-
-To find the input, go to the in-game page of [audio room](http://imas.gree-apps.net/app/index.php/audio_room),
-Use inspect elements or any other tools to get the source code and only copy the div with id tab-slide-area 
-    `<div id="tab-slide-area">`
-    
-It resides in
-    `<body><div id="gree-app-container"><div id="wrapper"><div class="main-bg">`
-    
-Use the "Copy the element" function of chrome will help you copy the whole div easily. Paste it into input.txt.
+Create a copy of the provided MLMusicInfoTemplate.xlsx and rename it as MLMusicInfo.xlsx. The script will write output into this file. Once you are done you are ready to run the script. 
