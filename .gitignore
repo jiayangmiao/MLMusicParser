@@ -8,6 +8,8 @@
 *.war
 *.ear
 
+.idea/
+
 ml_files/
 MLMusicInfo.xlsx
 MLMusicInfo1.xlsx
