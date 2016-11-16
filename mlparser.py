@@ -118,7 +118,8 @@ for thisItem in parsedJson:
 
         # Writing the track info
         trackCount = count
-        for thisTrack in sorted(thisItem['records']):
+        #for thisTrack in sorted(thisItem['records']):
+        for thisTrack in thisItem['records']:
             thisTrackInfo = thisItem['records']['{}'.format(thisTrack)]
             worksheet.write(trackCount, 6, thisTrackInfo['music_title'].replace('<small>',' ').replace('</small>',' ').replace('<br>',' '), importantFormat)
             worksheet.write(trackCount, 7, thisTrackInfo['music_artist_name'], importantFormat)
