@@ -1,18 +1,35 @@
 # -*- coding: utf-8 -*-
 
-import os.path
-from time import strftime
-from sys import exit
-
-from lxml import etree
 import json
+import os
+import sys
+from sys import exit
+from time import strftime
 
 import xlsxwriter
+from lxml import etree
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 print("Starting the Million Live Audio Room Parser...")
 
+fileName = ('ml.html')
+
+# Todo: make pyinstaller work with etree
+# determine if application is a script file or frozen exe
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+elif __file__:
+    application_path = os.path.dirname(__file__)
+
+rootPath = os.path.abspath(application_path)
+#filePath = os.path.join(application_path, fileName)
+filePath = rootPath + "/" + fileName
+print(filePath)
+
 # Check for input file
-if os.path.exists("ml.html") != True:
+if os.path.exists(filePath) != True:
     print("Error: Cannot find ml.html.")
     print("To get started properly, save the webpage of")
     print("URL:http://imas.gree-apps.net/app/index.php/audio_room")
@@ -26,9 +43,9 @@ if os.path.exists("ml.html") != True:
 parser = etree.HTMLParser(encoding='utf-8')
 print("Reading the file ...")
 tree = etree.parse('ml.html', parser)
-
+print("Passed HTML parsing!")
 scriptNodes = tree.xpath('//script')
-scriptNode = scriptNodes[len(scriptNodes)-1]
+scriptNode = scriptNodes[len(scriptNodes) - 1]
 
 # Cut out "var albums = " and ";" at the two ends to get json string
 
