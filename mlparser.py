@@ -3,18 +3,23 @@
 import json
 import os
 import sys
+import requests
+
 from sys import exit
 from time import strftime
 
 import xlsxwriter
 from lxml import etree
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 
 print("Starting the Million Live Audio Room Parser...")
 
 fileName = ('ml.html')
+
+if not os.path.exists('audio_files'):
+    os.makedirs('audio_files')
 
 # Todo: make pyinstaller work with etree
 # determine if application is a script file or frozen exe
@@ -58,8 +63,8 @@ scriptText = scriptText[startIndex:endIndex]
 parsedJson = json.loads(scriptText)
 
 # Create output file and basic formatting
-dateString = strftime("%Y-%m-%d%H%M")
-workbook = xlsxwriter.Workbook('MLMusicInfo{}.xlsx'.format(dateString))
+dateString = strftime("%Y-%m-%d %H%M")
+workbook = xlsxwriter.Workbook('MLMusicInfo {}.xlsx'.format(dateString))
 worksheet = workbook.add_worksheet()
 
 worksheet.set_column(0, 1, 30)
@@ -92,7 +97,8 @@ importantFormat.set_align('center')
 importantFormat.set_align('vcenter')
 importantFormat.set_text_wrap()
 importantFormat.set_border(1)
-importantFormat.set_bold()
+# 太文字刺さるので‥
+# importantFormat.set_bold()
 
 worksheet.merge_range(0, 0, 0, 9, 'Million Live! in game Audio Room info sheet', headerFormat)
 worksheet.write(1, 0, 'Album Composer', headerFormat)
@@ -105,6 +111,26 @@ worksheet.write(1, 6, 'Song Title', headerFormat)
 worksheet.write(1, 7, 'Song Artist', headerFormat)
 worksheet.write(1, 8, 'Song URL', headerFormat)
 worksheet.write(1, 9, 'Song Credit', headerFormat)
+
+# Helper function, -1 means changing to single whitespace
+def replacebrTagWith(instr, mode):
+    if mode == 1:
+        outstr = instr.replace('<br />','、').replace('<br/>','、').replace('<br>','、').replace('</br>','、')
+    elif mode == 0:
+        outstr = instr.replace('<br />','\n').replace('<br/>','\n').replace('<br>','\n').replace('</br>','\n')
+    else:
+        outstr = instr.replace('<br />', ' ').replace('<br/>', ' ').replace('<br>', ' ').replace('</br>', ' ')
+
+    return outstr
+
+def formatAudioFileName(filename):
+    outFilename = replacebrTagWith(filename, -1).replace('?', ' ').replace('<small>', ' ').replace('</small>', ' ')
+    outFilename = '{}.m4a'.format(outFilename)
+    return outFilename
+
+def downloadAudioFileFrom(url, pathname, filename):
+    r = requests.get(url, allow_redirects=True)
+    open('audio_files/{}/{}'.format(pathname, filename), 'wb').write(r.content)
 
 # Counter recording which row to write to
 count = 2
@@ -119,31 +145,39 @@ for thisItem in parsedJson:
 
         # Writing the album info
         if len(thisItem['records']) == 1:
-            worksheet.write(count, 0, thisItem['composer'], defaultFormat)
-            worksheet.write(count, 1, thisItem['lyricist'], defaultFormat)
-            worksheet.write(count, 2, thisItem['album_artist_name'].replace('<br />','、').replace('<br>','、'), importantFormat)
+            worksheet.write(count, 0, replacebrTagWith(thisItem['composer'], 0), defaultFormat)
+            worksheet.write(count, 1, replacebrTagWith(thisItem['lyricist'], 0), defaultFormat)
+            worksheet.write(count, 2, replacebrTagWith(thisItem['album_artist_name'], 1), importantFormat)
             worksheet.write(count, 3, thisItem['jacket'], urlFormat)
             worksheet.write(count, 4, thisItem['release_date'], defaultFormat)
-            worksheet.write(count, 5, thisItem['album_title'].replace('<br/>','\n').replace('<br>','\n'), importantFormat)
+            worksheet.write(count, 5, replacebrTagWith(thisItem['album_title'], 0), importantFormat)
         else:
-            worksheet.merge_range(count, 0, endCount, 0, thisItem['composer'], defaultFormat)
-            worksheet.merge_range(count, 1, endCount, 1, thisItem['lyricist'], defaultFormat)
-            worksheet.merge_range(count, 2, endCount, 2, thisItem['album_artist_name'].replace('<br />','、').replace('<br>','、'), importantFormat)
+            worksheet.merge_range(count, 0, endCount, 0, replacebrTagWith(thisItem['composer'], 0), defaultFormat)
+            worksheet.merge_range(count, 1, endCount, 1, replacebrTagWith(thisItem['lyricist'], 0), defaultFormat)
+            worksheet.merge_range(count, 2, endCount, 2, replacebrTagWith(thisItem['album_artist_name'], 1), importantFormat)
             worksheet.merge_range(count, 3, endCount, 3, thisItem['jacket'], urlFormat)
             worksheet.merge_range(count, 4, endCount, 4, thisItem['release_date'], defaultFormat)
-            worksheet.merge_range(count, 5, endCount, 5, thisItem['album_title'].replace('<br/>','\n').replace('<br>','\n'), importantFormat)
+            worksheet.merge_range(count, 5, endCount, 5, replacebrTagWith(thisItem['album_title'], 0), importantFormat)
+
+        # Create directory for audio files for this album
+        thisAlbumDirectoryName = replacebrTagWith(thisItem['album_title'], -1)
+        if not os.path.exists('audio_files/{}'.format(thisAlbumDirectoryName)):
+            os.makedirs('audio_files/{}'.format(thisAlbumDirectoryName))
 
         # Writing the track info
         trackCount = count
-        #for thisTrack in sorted(thisItem['records']):
+        # for thisTrack in sorted(thisItem['records']):
         for thisTrack in thisItem['records']:
             thisTrackInfo = thisItem['records']['{}'.format(thisTrack)]
-            worksheet.write(trackCount, 6, thisTrackInfo['music_title'].replace('<small>',' ').replace('</small>',' ').replace('<br>',' '), importantFormat)
-            worksheet.write(trackCount, 7, thisTrackInfo['music_artist_name'], importantFormat)
+            worksheet.write(trackCount, 6, formatAudioFileName(thisTrackInfo['music_title']), importantFormat)
+            worksheet.write(trackCount, 7, replacebrTagWith(thisTrackInfo['music_artist_name'], 0), importantFormat)
             worksheet.write(trackCount, 8, thisTrackInfo['music_src'], urlFormat)
-            worksheet.write(trackCount, 9, thisTrackInfo['credit'], defaultFormat)
-
+            worksheet.write(trackCount, 9, replacebrTagWith(thisTrackInfo['music_artist_name'], 0), defaultFormat)
+            worksheet.write(trackCount, 10, thisTrack[0], defaultFormat)
             trackCount += 1
+
+            thisTrackFileName = formatAudioFileName(thisTrackInfo['music_title'])
+            downloadAudioFileFrom(thisTrackInfo['music_src'], thisAlbumDirectoryName, thisTrackFileName)
 
         count = endCount + 1
 
